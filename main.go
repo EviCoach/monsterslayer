@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/EviCoach/monsterslayer/actions"
 	"github.com/EviCoach/monsterslayer/interactions"
 )
 
@@ -17,7 +16,7 @@ func main() {
 		winner = executeRound()
 	}
 
-	endGame()
+	endGame(winner)
 }
 
 func startGame() {
@@ -29,12 +28,41 @@ func executeRound() string {
 
 	interactions.ShowAvailableActions(isSpecialRound)
 	userChoice := interactions.GetPlayerChoice(isSpecialRound)
-	
-	if userChoice == "ATTACK"{
 
+	var playerAttackDmg int
+	var playerHealValue int
+	var monsterAttackDmg int
+
+	if userChoice == "ATTACK" {
+		playerAttackDmg = actions.AttackMonster(false)
 	} else if userChoice == "HEAL" {
-
+		playerHealValue = actions.HealPlayer()
+	} else {
+		playerAttackDmg = actions.AttackMonster(true)
 	}
+
+	monsterAttackDmg = actions.AttackPlayer()
+	playerHealth, monsterHealth := actions.GetHealthAmounts()
+
+	roundData := interactions.RoundData{
+		Action: userChoice,
+		PlayerHealth: playerHealth,
+		MonsterHealth: monsterHealth,
+		PlayerAttackDmg: playerAttackDmg,
+		PlayerHealValue: playerHealValue,
+		MonsterAttackDmg: monsterAttackDmg,
+	}
+
+	interactions.PrintRoundStatistics(&roundData)
+
+	if playerHealth <= 0 {
+		return "Monster"
+	} else if monsterHealth <= 0 {
+		return "Player"
+	}
+
 	return ""
 }
-func endGame() {}
+func endGame(winner string) {
+	interactions.DeclareWinner(winner)
+}
